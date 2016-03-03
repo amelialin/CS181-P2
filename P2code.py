@@ -30,6 +30,7 @@ from scipy import sparse
 import pandas as pd
 from sknn.mlp import Regressor, Layer, Classifier
 import sys
+import logging
 
 
 # os.chdir("C:\Users\WouterD\Dropbox\Recent Work Wouter\Harvard\kaggle")
@@ -59,7 +60,7 @@ def create_data_matrix(start_index, end_index, direc="train"):
     ids = [] 
     i = -1
     for datafile in os.listdir(direc):
-        print(datafile,"datafile")        
+        # print(datafile,"datafile")        
         if datafile == '.DS_Store':
             continue
  
@@ -69,7 +70,7 @@ def create_data_matrix(start_index, end_index, direc="train"):
         if i >= end_index:
             break
  
-        # print "datafile", i, datafile
+        print "datafile", i, datafile
  
         # extract id and true class (if available) from filename
         id_str, clazz = datafile.split('.')[:2]
@@ -212,29 +213,27 @@ def main():
  
     # train using neural net
     if modelchoice==1:
-        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100)
+        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, verbose=1)
     elif modelchoice==2:
         nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]/8), Layer("Sigmoid", units=X_train.shape[1]/16),Layer("Sigmoid", units=t_train.shape[0]), Layer("Softmax")],n_iter=50,n_stable=10,batch_size=25,learning_rate=0.002, learning_rule="momentum",valid_size=0.1, verbose=1) 
     elif modelchoice==3:
-        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100)
+        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, verbose=1)
     elif modelchoice==4:
-        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100)
+        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, verbose=1)
     elif modelchoice==5:
-        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100)
+        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, verbose=1)
     else:
         print("error in defining modelchoice") 
 
     nn.fit(X_train, t_train)
     nn.predict(X_train)
     y_pred=nn.predict(X_train)
-    print(y_pred[:,0],"ypred")
-    print(t_train,"t_train")
+    # print(y_pred[:,0],"ypred")
+    # print(t_train,"t_train")
     print(y_pred.shape,"yshape")
     print(t_train.shape,"train")
     correct=np.sum(np.equal(y_pred[:,0],t_train))
     print(correct,"correct guesses")
-    print "correct", correct
-    print "t_train.shape[0]", t_train.shape[0]
     print float(correct) / float(t_train.shape[0]) * 100, "accuracy %"
     
 ###running code
