@@ -46,7 +46,7 @@ def create_data_matrix(start_index, end_index, direc="train"):
         if i >= end_index:
             break
 
-        print "datafile", i, datafile
+        # print "datafile", i, datafile
 
         # extract id and true class (if available) from filename
         id_str, clazz = datafile.split('.')[:2]
@@ -95,16 +95,33 @@ def create_data_matrix(start_index, end_index, direc="train"):
     # concatenate into one feature matrix
     frames = [X_calls, X_custom_text]
     X = pd.concat(frames, axis=1)
-    print "X", X
+    # print "X", X
+    print "X.shape", X.shape
 
     return X, np.array(classes), ids
 
 def custom_text_features(text):
     
     custom_text_counter = {}
-    text_features = ["adult", "antivirus" "cool", 'desiredaccess="FILE_ANY_ACCESS"', "free", "warning", "warning!"]
+    text_features = ["adult", 
+        "antivirus",
+        "ascii", 
+        "cool", 
+        'desiredaccess="FILE_ANY_ACCESS"', 
+        '.ex"',
+        'flags="FILE_ATTRIBUTE_NORMAL SECURITY_ANONYMOUS"', 
+        "free", 
+        "HgiXXXy6", 
+        "http://www.", 
+        "money", 
+        "system32",
+        "ThunderRT6Main", 
+        ".txt", 
+        'value="Start Page"', 
+        "Warning", 
+        "Warning!"]
     for text_feature in text_features:
-        custom_text_counter["TEXT_" + text_feature] = text.count(text_feature)
+        custom_text_counter["TEXT_" + text_feature] = text.count(text_feature.lower())
         if custom_text_counter["TEXT_" + text_feature] > 0:
             print "Text has:", text_feature
 
@@ -150,9 +167,11 @@ def main():
     X_train, t_train, train_ids = create_data_matrix(0, 2, TRAIN_DIR)
     # X_valid, t_valid, valid_ids = create_data_matrix(10, 15, TRAIN_DIR)
 
-    # print 'Data matrix (training set):', "X_train", X_train
+    print 'Data matrix (training set):', "X_train", X_train
     # print 'Classes (training set):', "t_train", t_train
     print "Number of files processed:", len(t_train)
+
+    X_train.to_csv('X_train.csv')
 
     # # train using neural net
     # nn = Classifier(
