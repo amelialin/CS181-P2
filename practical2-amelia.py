@@ -32,10 +32,12 @@ def add_to_set(tree):
 
 def create_data_matrix(start_index, end_index, direc="train"):
     X = None
+    X_custom_text = None
     classes = []
     ids = [] 
     i = -1
     for datafile in os.listdir(direc):
+        print "datafile", datafile
         if datafile == '.DS_Store':
             continue
 
@@ -81,7 +83,28 @@ def create_data_matrix(start_index, end_index, direc="train"):
         # print "i", i
         # print "X", X
 
+        # parse files as text files
+        with open("train/"+ datafile, "r") as myfile:
+            text = myfile.read()
+        this_row = custom_text_features(text)
+        if X_custom_text is None: # if X is empty
+            X_custom_text = this_row 
+        else:
+            X_custom_text = np.vstack((X_custom_text, this_row))
+
+    print "X_custom_text", X_custom_text
+
     return X, np.array(classes), ids
+
+def custom_text_features(text):
+    
+    custom_text_counter = {}
+    text_features = ["hash_error"]
+    for text_feature in text_features:
+        custom_text_counter[text_feature] = text.count(text_feature)
+
+    print "custom_text_counter", custom_text_counter
+    return custom_text_counter
 
 def call_feats(tree):
 
@@ -109,24 +132,27 @@ def call_feats(tree):
     # return call_feat_array
     return call_counter
 
-## Feature extraction
-## ?? What's happening here ??
+def make_matrix(array):
+    """Takes an array of dictionaries and turns it into a Pandas DF matrix."""
+    feature_mat = [feature[0] for feature in array]
+    feature_mat = pandas.DataFrame(feature_mat)
+    feature_mat=feature_mat.fillna(0)
+    return feature_mat
+
 def main():
     # X_train, t_train, train_ids = create_data_matrix(0, 10, TRAIN_DIR)
     X_train, t_train, train_ids = create_data_matrix(0, 3, TRAIN_DIR)
-    X_valid, t_valid, valid_ids = create_data_matrix(10, 15, TRAIN_DIR)
+    # X_valid, t_valid, valid_ids = create_data_matrix(10, 15, TRAIN_DIR)
 
     # print 'Data matrix (training set):', "X_train", X_train
-    print 'Classes (training set):', "t_train", t_train
+    # print 'Classes (training set):', "t_train", t_train
     print "Number of files processed:", len(t_train)
 
-    feature_mat = [feature[0] for feature in X_train]
-    feature_mat = pandas.DataFrame(feature_mat)
-    feature_mat=feature_mat.fillna(0)    
+    feature_mat = make_matrix(X_train)
 
     print "feature_mat", feature_mat
     print "feature_mat.shape", feature_mat.shape
-    print "Number of features:", feature_mat.shape[1]
+    # print "Number of features:", feature_mat.shape[1]
 
     # # train using neural net
     # nn = Classifier(
