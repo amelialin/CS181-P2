@@ -155,25 +155,29 @@ def make_matrix(dict):
     return feature_mat
 
 def main():
-    X_train, t_train, train_ids = create_data_matrix(0, 10, TRAIN_DIR)
+    X_train, t_train, train_ids = create_data_matrix(0, 800, TRAIN_DIR)
     # X_valid, t_valid, valid_ids = create_data_matrix(10, 15, TRAIN_DIR)
 
     print 'Data matrix (training set):', "X_train", X_train
     # print 'Classes (training set):', "t_train", t_train
     print "Number of files processed:", len(t_train)
 
+    # save to CSV
     X_train.to_csv("X_train.csv")
     np.savetxt("t_train.csv", t_train, delimiter="\n")
 
-    # # train using neural net
-    # nn = Classifier(
-    # layers=[
-    #     Layer("Rectifier", units=feature_mat.shape[1]),
-    #     Layer("Softmax")],
-    # learning_rate=0.02,
-    # n_iter=10)
-    # nn.fit(X_train, t_train)
-    # nn.predict(X_train)
+    # convert DF to numpy array
+    X_train = X_train.as_matrix(columns=None)
+
+    # train using neural net
+    nn = Classifier(
+    layers=[
+        Layer("Rectifier", units=X_train.shape[1]),
+        Layer("Softmax")],
+    learning_rate=0.001,
+    n_iter=100)
+    nn.fit(X_train, t_train)
+    nn.predict(X_train)
 
 # a function for writing predictions in the required format
 def write_predictions(predictions, ids, outfile):
