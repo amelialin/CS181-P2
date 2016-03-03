@@ -12,7 +12,7 @@ except ImportError:
     import xml.etree.ElementTree as ET
 import numpy as np
 from scipy import sparse
-import pandas
+import pandas as pd
 import util
 from sknn.mlp import Regressor, Layer, Classifier
 
@@ -37,11 +37,8 @@ def create_data_matrix(start_index, end_index, direc="train"):
     ids = [] 
     i = -1
     for datafile in os.listdir(direc):
-        print "datafile", datafile
         if datafile == '.DS_Store':
             continue
-
-        # print "i", i
 
         i += 1
         if i < start_index:
@@ -49,11 +46,11 @@ def create_data_matrix(start_index, end_index, direc="train"):
         if i >= end_index:
             break
 
+        print "datafile", i, datafile
+
         # extract id and true class (if available) from filename
         id_str, clazz = datafile.split('.')[:2]
         ids.append(id_str)
-
-        # print "ids", ids
 
         # add target class if this is training data
         try:
@@ -65,13 +62,9 @@ def create_data_matrix(start_index, end_index, direc="train"):
             assert clazz == "X"
             classes.append(-1)
 
-        # print "classes", classes
-
         # parse file as an xml document
         tree = ET.parse(os.path.join(direc,datafile))
         add_to_set(tree)
-
-        # print "tree", tree
 
         this_row = call_feats(tree)
         if X_calls is None: # if X is empty
@@ -79,33 +72,43 @@ def create_data_matrix(start_index, end_index, direc="train"):
         else:
             X_calls = np.vstack((X_calls, this_row))
 
-        # parse files as text files
+        # parse files as lowercase text files
         with open("train/"+ datafile, "r") as myfile:
-            text = myfile.read()
+            text = myfile.read().lower()
         this_row = custom_text_features(text)
         if X_custom_text is None: # if X is empty
             X_custom_text = this_row 
         else:
             X_custom_text = np.vstack((X_custom_text, this_row))
+        
+        # print "X_calls", X_calls
+        # print "X_custom_text \n", X_custom_text
 
     # turn arrays of dicts into Pandas DFs
     X_calls = make_matrix(X_calls)
     X_custom_text = make_matrix(X_custom_text)
 
-    print "X_calls", X_calls
-    print "X_custom_text \n", X_custom_text
-    print "X_custom_text.shape", X_custom_text.shape
+    # print "X_calls", X_calls
+    # print "X_custom_text \n", X_custom_text
+    # print "X_custom_text.shape", X_custom_text.shape
 
-    # return X, np.array(classes), ids
+    # concatenate into one feature matrix
+    frames = [X_calls, X_custom_text]
+    X = pd.concat(frames, axis=1)
+    print "X", X
+
+    return X, np.array(classes), ids
 
 def custom_text_features(text):
     
     custom_text_counter = {}
-    text_features = ["hash_error"]
+    text_features = ["adult", "antivirus" "cool", 'desiredaccess="FILE_ANY_ACCESS"', "free", "warning", "warning!"]
     for text_feature in text_features:
-        custom_text_counter["text_" + text_feature] = text.count(text_feature)
+        custom_text_counter["TEXT_" + text_feature] = text.count(text_feature)
+        if custom_text_counter["TEXT_" + text_feature] > 0:
+            print "Text has:", text_feature
 
-    print "custom_text_counter", custom_text_counter
+    # print custom_text_counter
     return custom_text_counter
 
 def call_feats(tree):
@@ -134,16 +137,17 @@ def call_feats(tree):
     # return call_feat_array
     return call_counter
 
-def make_matrix(array):
+def make_matrix(dict):
     """Takes an array of dictionaries and turns it into a Pandas DF matrix."""
-    feature_mat = [feature[0] for feature in array]
-    feature_mat = pandas.DataFrame(feature_mat)
+    feature_mat = [feature[0] for feature in dict]
+    feature_mat = pd.DataFrame(feature_mat)
     feature_mat=feature_mat.fillna(0)
+    # print "feature_mat", feature_mat
     return feature_mat
 
 def main():
     # X_train, t_train, train_ids = create_data_matrix(0, 10, TRAIN_DIR)
-    X_train, t_train, train_ids = create_data_matrix(0, 3, TRAIN_DIR)
+    X_train, t_train, train_ids = create_data_matrix(0, 2, TRAIN_DIR)
     # X_valid, t_valid, valid_ids = create_data_matrix(10, 15, TRAIN_DIR)
 
     # print 'Data matrix (training set):', "X_train", X_train
