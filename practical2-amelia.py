@@ -80,23 +80,14 @@ def create_data_matrix(start_index, end_index, direc="train"):
             X_custom_text = this_row 
         else:
             X_custom_text = np.vstack((X_custom_text, this_row))
-        
-        # print "X_calls", X_calls
-        # print "X_custom_text \n", X_custom_text
 
     # turn arrays of dicts into Pandas DFs
     X_calls = make_matrix(X_calls)
     X_custom_text = make_matrix(X_custom_text)
 
-    # print "X_calls", X_calls
-    # print "X_custom_text \n", X_custom_text
-    # print "X_custom_text.shape", X_custom_text.shape
-
     # concatenate into one feature matrix
     frames = [X_calls, X_custom_text]
     X = pd.concat(frames, axis=1)
-    # print "X", X
-    print "X.shape", X.shape
 
     return X, np.array(classes), ids
 
@@ -122,24 +113,20 @@ def custom_text_features(text):
         "Warning!"]
     for text_feature in text_features:
         custom_text_counter["TEXT_" + text_feature] = text.count(text_feature.lower())
-        if custom_text_counter["TEXT_" + text_feature] > 0:
-            print "Text has:", text_feature
+        # if custom_text_counter["TEXT_" + text_feature] > 0:
+        #     print "Text has:", text_feature
 
-    # print custom_text_counter
     return custom_text_counter
 
 def call_feats(tree):
 
     call_counter = {}
     for el in tree.iter(): # el = element
-        # print "el", el
         call = el.tag
-        # print "call", call
         if call not in call_counter:
             call_counter[call] = 0
         else:
             call_counter[call] += 1
-        # print "call_counter", call_counter
 
     # good_calls = ['sleep', 'dump_line']
     
@@ -159,12 +146,10 @@ def make_matrix(dict):
     feature_mat = [feature[0] for feature in dict]
     feature_mat = pd.DataFrame(feature_mat)
     feature_mat=feature_mat.fillna(0)
-    # print "feature_mat", feature_mat
     return feature_mat
 
 def main():
-    # X_train, t_train, train_ids = create_data_matrix(0, 10, TRAIN_DIR)
-    X_train, t_train, train_ids = create_data_matrix(0, 2, TRAIN_DIR)
+    X_train, t_train, train_ids = create_data_matrix(0, 10, TRAIN_DIR)
     # X_valid, t_valid, valid_ids = create_data_matrix(10, 15, TRAIN_DIR)
 
     print 'Data matrix (training set):', "X_train", X_train
