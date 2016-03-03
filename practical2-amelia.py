@@ -31,7 +31,7 @@ def add_to_set(tree):
         call_set.add(call)
 
 def create_data_matrix(start_index, end_index, direc="train"):
-    X = None
+    X_calls = None
     X_custom_text = None
     classes = []
     ids = [] 
@@ -74,14 +74,10 @@ def create_data_matrix(start_index, end_index, direc="train"):
         # print "tree", tree
 
         this_row = call_feats(tree)
-        if X is None: # if X is empty
-            X = this_row 
+        if X_calls is None: # if X is empty
+            X_calls = this_row 
         else:
-            X = np.vstack((X, this_row))
-        
-        # print "datafile", datafile
-        # print "i", i
-        # print "X", X
+            X_calls = np.vstack((X_calls, this_row))
 
         # parse files as text files
         with open("train/"+ datafile, "r") as myfile:
@@ -92,16 +88,22 @@ def create_data_matrix(start_index, end_index, direc="train"):
         else:
             X_custom_text = np.vstack((X_custom_text, this_row))
 
-    print "X_custom_text", X_custom_text
+    # turn arrays of dicts into Pandas DFs
+    X_calls = make_matrix(X_calls)
+    X_custom_text = make_matrix(X_custom_text)
 
-    return X, np.array(classes), ids
+    print "X_calls", X_calls
+    print "X_custom_text \n", X_custom_text
+    print "X_custom_text.shape", X_custom_text.shape
+
+    # return X, np.array(classes), ids
 
 def custom_text_features(text):
     
     custom_text_counter = {}
     text_features = ["hash_error"]
     for text_feature in text_features:
-        custom_text_counter[text_feature] = text.count(text_feature)
+        custom_text_counter["text_" + text_feature] = text.count(text_feature)
 
     print "custom_text_counter", custom_text_counter
     return custom_text_counter
@@ -147,12 +149,6 @@ def main():
     # print 'Data matrix (training set):', "X_train", X_train
     # print 'Classes (training set):', "t_train", t_train
     print "Number of files processed:", len(t_train)
-
-    feature_mat = make_matrix(X_train)
-
-    print "feature_mat", feature_mat
-    print "feature_mat.shape", feature_mat.shape
-    # print "Number of features:", feature_mat.shape[1]
 
     # # train using neural net
     # nn = Classifier(
