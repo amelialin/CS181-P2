@@ -155,7 +155,7 @@ def make_matrix(dict):
     return feature_mat
 
 def main():
-    X_train, t_train, train_ids = create_data_matrix(0, 800, TRAIN_DIR)
+    X_train, t_train, train_ids = create_data_matrix(0, 200, TRAIN_DIR)
     # X_valid, t_valid, valid_ids = create_data_matrix(10, 15, TRAIN_DIR)
 
     print 'Data matrix (training set):', "X_train", X_train
