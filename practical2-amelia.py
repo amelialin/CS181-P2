@@ -4,6 +4,12 @@
 
 # This code requires that the unzipped training set is in a folder called "train". 
 
+"""
+@author: amelialin
+
+Running this script creates a feature matrix X_train by parsing files in the 'train' directory, and also outputs X_train and t_train to csv.
+"""
+
 import os
 from collections import Counter
 try:
@@ -156,7 +162,8 @@ def main():
     # print 'Classes (training set):', "t_train", t_train
     print "Number of files processed:", len(t_train)
 
-    X_train.to_csv('X_train.csv')
+    X_train.to_csv("X_train.csv")
+    np.savetxt("t_train.csv", t_train, delimiter="\n")
 
     # # train using neural net
     # nn = Classifier(
