@@ -135,7 +135,13 @@ def custom_text_features(text):
         ".txt", 
         'value="Start Page"', 
         "Warning", 
-        "Warning!"]
+        "Warning!",
+        'terminationtime="00:00.000"',
+        'terminationreason="Unknown"',
+        'executionstatus="CouldNotInstallHook"',
+        'filesize="-1"',
+        'username="Administrator"',
+        'username="SYSTEM"']
     for text_feature in text_features:
         custom_text_counter["TEXT_" + text_feature] = text.count(text_feature.lower())
         # if custom_text_counter["TEXT_" + text_feature] > 0:
@@ -193,18 +199,24 @@ def write_predictions(predictions, ids, outfile):
 def main():
     X_train_all, t_train_all, train_ids = create_data_matrix(0, num_files, TRAIN_DIR)
 
+    # print "X_train_all.shape", X_train_all.shape
+    # print "X_train_all \n", X_train_all
+
     # split into data and validation set
-    X_train, X_valid, t_train, t_valid = train_test_split(
-             X_train_all, t_train_all, test_size=0.2, random_state=0)
+    # X_train, X_valid, t_train, t_valid = train_test_split(X_train_all, t_train_all, test_size=0, random_state=0)
+    
+    # ...or don't split them
+    X_train = X_train_all
+    t_train = t_train_all
 
     print "X_train shape:", X_train.shape
     print "t_train shape:", t_train.shape
-    print "X_valid shape:", X_valid.shape
-    print "t_valid shape:", t_valid.shape
+    # print "X_valid shape:", X_valid.shape
+    # print "t_valid shape:", t_valid.shape
 
     # X_valid, t_valid, valid_ids = create_data_matrix(10, 15, TRAIN_DIR)
  
-    # print 'Data matrix (training set):', "X_train", X_train
+    # print 'Data matrix (training set):', "X_train \n", X_train
     # print 'Classes (training set):', "t_train", t_train
  
     # save to CSV
@@ -213,38 +225,33 @@ def main():
  
     # convert DF to numpy array
     X_train = X_train.as_matrix(columns=None)
-    X_valid = X_valid.as_matrix(columns=None)
+    # X_valid = X_valid.as_matrix(columns=None)
  
     # train using neural net
     if modelchoice==1:
-        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, verbose=1)
+        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, valid_size=0.2, verbose=1)
     elif modelchoice==2:
-        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]/8), Layer("Sigmoid", units=X_train.shape[1]/16),Layer("Sigmoid", units=t_train.shape[0]), Layer("Softmax")],n_iter=50,n_stable=10,batch_size=25,learning_rate=0.002, learning_rule="momentum",valid_size=0.1, verbose=1) 
+        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]/8), Layer("Sigmoid", units=X_train.shape[1]/16),Layer("Sigmoid", units=t_train.shape[0]), Layer("Softmax")],n_iter=50,n_stable=10,batch_size=25,learning_rate=0.002, learning_rule="momentum",valid_size=0.2, verbose=1) 
     elif modelchoice==3:
-        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, verbose=1)
+        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, valid_size=0.2, verbose=1)
     elif modelchoice==4:
-        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, verbose=1)
+        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, valid_size=0.2, verbose=1)
     elif modelchoice==5:
-        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, verbose=1)
+        nn = Classifier(layers=[Layer("Sigmoid", units=X_train.shape[1]),Layer("Softmax")],learning_rate=0.001,n_iter=100, valid_size=0.2, verbose=1)
     else:
         print("error in defining modelchoice") 
 
     nn.fit(X_train, t_train)
-    # nn.predict(X_valid)
-    y_pred=nn.predict(X_valid)
-    # print(y_pred[:,0],"ypred")
-    # print(t_train,"t_train")
-    # print "X_train.shape", X_train.shape
-    print(y_pred.shape,"yshape")
-    print(t_train.shape,"train")
-    correct=np.sum(np.equal(y_pred[:,0],t_valid))
-    print(correct,"correct guesses")
-    print float(correct) / float(t_valid.shape[0]) * 100, "accuracy %"
+    # y_pred=nn.predict(X_valid)
+    # print(y_pred.shape,"yshape")
+    # print(t_train.shape,"train")
+    # correct=np.sum(np.equal(y_pred[:,0],t_valid))
+    # print(correct,"correct guesses")
+    # print float(correct) / float(t_valid.shape[0]) * 100, "accuracy %"
     
 ###running code
 modelchoice=float(sys.argv[1]) 
 num_files=float(sys.argv[2])
-#modelchoice=1
  
 if __name__ == "__main__":
     main()
