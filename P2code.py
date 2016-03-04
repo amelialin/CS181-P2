@@ -195,11 +195,11 @@ def main():
 
     # split into data and validation set
     X_train, X_valid, t_train, t_valid = train_test_split(
-             X_train_all, t_train_all, test_size=0.5, random_state=0)
+             X_train_all, t_train_all, test_size=0.2, random_state=0)
 
     print "X_train shape:", X_train.shape
-    print "X_valid shape:", X_valid.shape
     print "t_train shape:", t_train.shape
+    print "X_valid shape:", X_valid.shape
     print "t_valid shape:", t_valid.shape
 
     # X_valid, t_valid, valid_ids = create_data_matrix(10, 15, TRAIN_DIR)
@@ -213,6 +213,7 @@ def main():
  
     # convert DF to numpy array
     X_train = X_train.as_matrix(columns=None)
+    X_valid = X_valid.as_matrix(columns=None)
  
     # train using neural net
     if modelchoice==1:
@@ -229,16 +230,16 @@ def main():
         print("error in defining modelchoice") 
 
     nn.fit(X_train, t_train)
-    nn.predict(X_train)
-    y_pred=nn.predict(X_train)
+    # nn.predict(X_valid)
+    y_pred=nn.predict(X_valid)
     # print(y_pred[:,0],"ypred")
     # print(t_train,"t_train")
-    print "X_train.shape", X_train.shape
+    # print "X_train.shape", X_train.shape
     print(y_pred.shape,"yshape")
     print(t_train.shape,"train")
-    correct=np.sum(np.equal(y_pred[:,0],t_train))
+    correct=np.sum(np.equal(y_pred[:,0],t_valid))
     print(correct,"correct guesses")
-    print float(correct) / float(t_train.shape[0]) * 100, "accuracy %"
+    print float(correct) / float(t_valid.shape[0]) * 100, "accuracy %"
     
 ###running code
 modelchoice=float(sys.argv[1]) 
