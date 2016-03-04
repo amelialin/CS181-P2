@@ -14,7 +14,7 @@ Created on Thu Mar 03 15:51:11 2016
 """
 @author: amelialin
  
-Running this script creates a feature matrix X_train by parsing files in the 'train' directory, and also outputs X_train and t_train to csv.
+Running this script creates a feature matrix X_train by parsing files in the 'train' directory, and also outputs X_train and t_train to csv. When run from the command line, this script takes 2 arguments: 1) The model # to use, and 2) the number of training files to use (out of a max of 3086).
 """
 
 
@@ -31,6 +31,7 @@ import pandas as pd
 from sknn.mlp import Regressor, Layer, Classifier
 import sys
 import logging
+from sklearn.cross_validation import train_test_split
 
 
 # os.chdir("C:\Users\WouterD\Dropbox\Recent Work Wouter\Harvard\kaggle")
@@ -70,7 +71,7 @@ def create_data_matrix(start_index, end_index, direc="train"):
         if i >= end_index:
             break
  
-        print "datafile", i, datafile
+        print "datafile", i+1, datafile
  
         # extract id and true class (if available) from filename
         id_str, clazz = datafile.split('.')[:2]
@@ -190,19 +191,21 @@ def write_predictions(predictions, ids, outfile):
  
 
 def main():
-    X_train, t_train, train_ids = create_data_matrix(0, 200, TRAIN_DIR)
-    
-####we want to split into data and validation set probably here    
-    
-#     X_train, X_test, y_train, y_test = train_test_split(
-# ...     X, y, test_size=0.33, random_state=42)
+    X_train_all, t_train_all, train_ids = create_data_matrix(0, num_files, TRAIN_DIR)
+
+    # split into data and validation set
+    X_train, X_valid, t_train, t_valid = train_test_split(
+             X_train_all, t_train_all, test_size=0.5, random_state=0)
+
+    print "X_train shape:", X_train.shape
+    print "X_valid shape:", X_valid.shape
+    print "t_train shape:", t_train.shape
+    print "t_valid shape:", t_valid.shape
 
     # X_valid, t_valid, valid_ids = create_data_matrix(10, 15, TRAIN_DIR)
  
     # print 'Data matrix (training set):', "X_train", X_train
     # print 'Classes (training set):', "t_train", t_train
-    print "X_train.shape", X_train.shape
-    print "Number of files processed:", len(t_train)
  
     # save to CSV
     X_train.to_csv("X_train.csv")
@@ -230,6 +233,7 @@ def main():
     y_pred=nn.predict(X_train)
     # print(y_pred[:,0],"ypred")
     # print(t_train,"t_train")
+    print "X_train.shape", X_train.shape
     print(y_pred.shape,"yshape")
     print(t_train.shape,"train")
     correct=np.sum(np.equal(y_pred[:,0],t_train))
@@ -238,6 +242,7 @@ def main():
     
 ###running code
 modelchoice=float(sys.argv[1]) 
+num_files=float(sys.argv[2])
 #modelchoice=1
  
 if __name__ == "__main__":
